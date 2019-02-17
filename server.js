@@ -1,10 +1,9 @@
 const express = require("express");
-const cv = require("opencv4nodejs");
-const path = require("path");
 const app = express();
-
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
+const cv = require("opencv4nodejs");
+const path = require("path");
 
 const FPS = 30;
 const wCap = new cv.VideoCapture(0);
@@ -19,12 +18,27 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-setInterval(() => {
+setInterval(function() {
   const frame = wCap.read();
   const image = cv.imencode(".jpg", frame).toString("base64");
   io.emit("image", image);
+
+  require("fs").writeFile("input.png", image, "base64", function(err) {
+    //console.log(err);
+  });
+
+  var spawn = require("child_process").spawn;
+  var process = spawn("python", ["./model.py"]);
+  console.log("Running the script");
+
+  process.stdout.on("data", function(result) {
+    var textChunk = result.toString("utf-8"); // buffer to string
+    console.log(textChunk);
+    console.log("Sending the response.");
+    io.emit("text", textChunk);
+  });
 }, 1000 / FPS);
 
-server.listen(4444, function() {
-  console.log("Server started.");
+server.listen(process.env.PORT || 4444, function() {
+  console.log("Server started");
 });

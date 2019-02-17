@@ -11,6 +11,7 @@
     "nodemon": "^1.18.10",
     "opencv4nodejs": "^4.14.1",
     "prettier": "^1.16.4",
+    "python-shell": "^1.0.7",
     "socket.io": "^2.2.0",
     "socketio": "^1.0.0"
   },
